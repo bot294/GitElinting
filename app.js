@@ -1,5 +1,5 @@
 // This is a poorly formatted function with linting issues
-function badlyFormattedFunction() {
+function badly_formatted_function() {
   var camelCaseVariable = "This should be snake_case";
   if (true) {
     console.log("ok!!! This block is not properly indented");
@@ -11,4 +11,4 @@ function badlyFormattedFunction() {
   return camelCaseVariable;
 }
 
-badlyFormattedFunction();
+badly_formatted_function();
