@@ -1,5 +1,4 @@
 import globals from "globals";
-//import tseslint from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
 import react from "eslint-plugin-react";
 
