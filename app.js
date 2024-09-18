@@ -3,8 +3,7 @@
  * @returns {string} A formatted string.
  */
 function properlyFormattedFunction() {
-  const camelCaseVariable = "This should be in camelCase"; // Correct variable naming
-
+  const camelCaseVariable = "This should be in camelCase"; // Correct variable na
   if (Math.random() > 0.5) {
     // Replace constant condition with dynamic condition
     console.log("This block is properly indented");
