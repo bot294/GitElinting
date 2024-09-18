@@ -1,7 +1,32 @@
+# -*- mode: yaml -*-
+# +----------------------------------------------------------------------------+
+# | /:\ gitStream: Workflow automation for the code review process.            |
+# +----------------------------------------------------------------------------+
+# | This file contains one or more /:\ gitStream automations:                  |
+# | https:// docs.gitstream.cm                                                 |
+# |                                                                            |
+# | gitStream uses YAML syntax with nunjucks templating via Jinja 2.           |
+# |                                                                            |
+# | Automations follow an "if this, then that" execution format.               |
+# | More info here: https://docs.gitstream.cm/how-it-works/                    |
+# |                                                                            |
+# +----------------------------------------------------------------------------+
+
+# /:\ gitStream Reference Docs: 
+#    Context Variables: https://docs.gitstream.cm/context-variables/
+#    Filter Functions: https://docs.gitstream.cm/filter-functions/
+#    Automation Actions: https://docs.gitstream.cm/automation-actions/
+
 manifest:
   version: 1.0
 
+# +----------------------------------------------------------------------------+
+# | Automations
+# +----------------------------------------------------------------------------+
+
 automations:
+  # Apply color coded labels to PRs based on the estimated time to review.
+  # https://docs.gitstream.cm/automations/provide-estimated-time-to-review/
   estimated_time_to_review:
     if:
       - true
@@ -9,62 +34,63 @@ automations:
       - action: add-label@v1
         args:
           label: "{{ calc.etr }} min review"
-          color: {{ colors.red if (calc.etr >= 20) else (colors.yellow if (calc.etr >= 5) else colors.green) }}
+          color: {{ colors.red if (calc.etr >= 20) else ( colors.yellow if (calc.etr >= 5) else colors.green ) }}
 
-  check_sonarcloud_quality_gate:
+  # Flag PRs that are missing a Jira ticket reference in the title or description.
+  # https://docs.gitstream.cm/integrations/jira/
+  label_missing_jira_info:
     if:
-      - {{ not pr.sonar_quality_gate_passed }}
-    run:
-      - name: Log PR information
-        run: echo "SonarCloud quality gate failed for PR #${{ pr.number }}"
-      - action: add-comment@v1
-        args:
-          comment: |
-            SonarCloud quality gate has not passed. Please address the issues and rerun the check.
-      - action: request-changes@v1
-        args:
-          comment: |
-            PR is blocked until SonarCloud issues are resolved.
-
-  label_missing_clickup_info:
-    if:
-      - {{ not (has.clickup_ticket_in_title or has.clickup_ticket_in_desc) }}
+      - {{ not (has.jira_ticket_in_title or has.jira_ticket_in_desc) }}
     run:
       - action: add-label@v1
         args:
-          label: "missing-clickup"
+          label: "missing-jira"
           color: {{ colors.red }}
-      - action: add-comment@v1
-        args:
-          comment: |
-            This PR is missing a ClickUp ticket reference in the title or description.
-            Please add a ClickUp ticket reference to the title or description of this PR.
 
-  check_pr_labels_and_descriptions:
+  # Flag PRs that have unresolved comment threads.
+  # https://docs.gitstream.cm/automations/standard/label-management/label-unresolved-threads/
+  label_unresolved_threads:  
     if:
-      - {{ pr.missing_labels or not pr.has_description }}
+      - {{ pr.status == 'open' }}  
+      - {{ pr.unresolved_threads }}
     run:
-      - action: add-comment@v1
+      - action: add-label@v1
         args:
-          comment: |
-            Please ensure that the PR has the correct labels and a brief description of the approach.
+          label: 🚨 {{ pr.unresolved_threads }} Unresolved Thread(s)
+          color: {{ colors.yellow }}  
 
-  explain_code_experts:
+  # Flag PRs that delete files to highlight potential refactors that need extra scrutiny.
+  # https://docs.gitstream.cm/automations/label-deleted-files/
+  flag_deleted_files:
     if:
-      - true
-    run:
-      - action: explain-code-experts@v1 
+      - {{ has.deleted_files }}
+    run: 
+      - action: add-label@v1
         args:
-          gt: 10 
+          label: 🗑️ Deleted files
+          color: {{ colors.orange }}
 
+
+# +----------------------------------------------------------------------------+
+# | Custom Expressions                                                         |
+# | https://docs.gitstream.cm/how-it-works/#custom-expressions                 |
+# +----------------------------------------------------------------------------+
+
+# https://docs.gitstream.cm/filter-functions/#estimatedreviewtime
 calc:
   etr: {{ branch | estimatedReviewTime }}
 
 has:
-  clickup_ticket_in_title: {{ pr.title | includes(regex=r/CL-\d+/) }}
-  clickup_ticket_in_desc: {{ pr.description | includes(regex=r/clickup.com\/t\/CL-\d+/) }}
+  jira_ticket_in_title: {{ pr.title | includes(regex=r/\b[A-Za-z]+-\d+\b/) }}
+  jira_ticket_in_desc: {{ pr.description | includes(regex=r/atlassian.net\/browse\/\w{1,}-\d{3,4}/) }}
+  deleted_files: {{ source.diff.files | map(attr='new_file') | match(term='/dev/null') | some }}
 
+
+# These are all of the colors in GitHub's default label color palette.
 colors:
   red: 'b60205'
+  orange: 'd93f0b'
   yellow: 'fbca04'
   green: '0e8a16'
+  blue: '1d76db'
+  purple: '5319e7'
