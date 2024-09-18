@@ -21,7 +21,7 @@ automations:
         args:
           comment: |
             SonarCloud quality gate has not passed. Please address the issues and rerun the check.
-      - action: fail-check@v1
+      - action:  request-changes@v1
         args:
           check: sonarcloud-quality-gate
           reason: |
