@@ -45,3 +45,8 @@ jobs:
           installation_id: ${{ github.event.inputs.installation_id }}
           resolver_url: ${{ github.event.inputs.resolver_url }}
           resolver_token: ${{ github.event.inputs.resolver_token }}
+
+      # Add ESLint check to the workflow
+      - name: Run ESLint
+        run: npm run lint
+        continue-on-error: false  # Fail the workflow if linting errors occur
