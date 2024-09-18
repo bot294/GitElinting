@@ -16,7 +16,6 @@ export default {
   },
   plugins: {
     react,
-    "@typescript-eslint": tseslint,
   },
   rules: {
     "@typescript-eslint/naming-convention": [
