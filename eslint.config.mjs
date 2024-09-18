@@ -29,7 +29,7 @@ export default {
       },
       {
         selector: "function",
-        format: ["camelCase", "PascalCase"],
+        format: ["snake_case", "PascalCase"],
       },
       {
         selector: "typeLike",
