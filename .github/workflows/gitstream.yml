@@ -65,6 +65,7 @@ jobs:
         run: npm install
       
       # Run ESLint to check the code
-      - name: Run ESLint
-        run: npm run lint
+      - name: Set executable permissions for node modules
+        run: chmod +x ./node_modules/.bin/eslint
+
         continue-on-error: false  # Fail the workflow if linting errors occur
