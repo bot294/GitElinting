@@ -2,7 +2,6 @@ manifest:
   version: 1.0
 
 automations:
-  # Add a label that indicates how many minutes it will take to review the PR.
   estimated_time_to_review:
     if:
       - true
@@ -11,52 +10,18 @@ automations:
         args:
           label: "{{ calc.etr }} min review"
           color: {{ colors.red if (calc.etr >= 20) else ( colors.yellow if (calc.etr >= 5) else colors.green ) }}
-  
-  # Check if SonarCloud quality gate is passed
-  name: Check SonarCloud Quality Gate
 
-on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  check_sonarcloud_quality_gate:
+    if:
+      - true
+    run:
+      - action: add-comment@v1
+        args:
+          comment: "SonarCloud quality gate has not passed. Please address the issues and rerun the check."
+      - action: block-pr@v1
+        args:
+          reason: "PR is blocked until SonarCloud issues are resolved."
 
-jobs:
-  check_quality_gate:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check SonarCloud Quality Gate
-        id: check
-        run: |
-          # Here you would run a script or command to check the quality gate
-          # For example, using SonarCloud's API to check the quality gate status
-          quality_gate_passed=$(curl -s -X GET "https://sonarcloud.io/api/qualitygates/project_status?projectKey=${{ github.repository }}" -H "Authorization: Bearer ${{ secrets.SONAR_TOKEN }}" | jq '.projectStatus.status == "OK"')
-
-          if [ "$quality_gate_passed" != "true" ]; then
-            echo "SonarCloud quality gate has not passed."
-            exit 1
-          fi
-
-      - name: Add Comment and Block PR
-        if: failure()
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const comment = "SonarCloud quality gate has not passed. Please address the issues and rerun the check.";
-            const reason = "PR is blocked until SonarCloud issues are resolved.";
-
-            await github.rest.issues.createComment({
-              ...context.repo,
-              issue_number: context.issue.number,
-              body: comment
-            });
-
-            await github.rest.pulls.update({
-              ...context.repo,
-              pull_number: context.issue.number,
-              state: 'closed'
-            });
-
-
-  # Check if ClickUp ticket reference is in PR title or description
   label_missing_clickup_info:
     if:
       - {{ not (has.clickup_ticket_in_title or has.clickup_ticket_in_desc) }}
@@ -71,7 +36,6 @@ jobs:
             This PR is missing a ClickUp ticket reference in the title or description.
             Please add a ClickUp ticket reference to the title or description of this PR.
 
-  # Check PR labels and descriptions
   check_pr_labels_and_descriptions:
     if:
       - {{ pr.missing_labels or not pr.has_description }}
@@ -81,7 +45,6 @@ jobs:
           comment: |
             Please ensure that the PR has the correct labels and a brief description of the approach.
 
-  # Post a comment that lists the best experts for the files that were modified.
   explain_code_experts:
     if:
       - true
