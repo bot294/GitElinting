@@ -14,7 +14,7 @@ function properlyFormattedFunction() {
    * This is a nested function with proper JSDoc.
    * @returns {string} A message from the nested function.
    */
-  function nestedFunction() {
+  function nested_function() {
     return "This function now has a JSDoc comment";
   }
 
