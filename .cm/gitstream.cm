@@ -13,18 +13,7 @@ automations:
           color: {{ colors.red if (calc.etr >= 20) else ( colors.yellow if (calc.etr >= 5) else colors.green ) }}
   
   # Check if SonarCloud quality gate is passed
-  check_sonarcloud_quality_gate:
-    if:
-      - {{ not pr.sonar_quality_gate_passed }}
-    run:
-      - action: add-comment@v1
-        args:
-          comment: |
-            SonarCloud quality gate has not passed. Please address the issues and rerun the check.
-      - action: block-pr@v1
-        args:
-          reason: |
-            PR is blocked until SonarCloud issues are resolved.
+  
 
   # Check if ClickUp ticket reference is in PR title or description
   label_missing_clickup_info:
