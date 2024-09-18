@@ -19,6 +19,6 @@ function properlyFormattedFunction() {
 
   nestedFunction(); // Call the function to avoid the unused variable error
 
-  return camelCaseVariable;
+  return camel_CaseVariable;
 }
 properlyFormattedFunction();
