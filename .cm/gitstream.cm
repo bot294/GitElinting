@@ -1,66 +1,35 @@
+# -*- mode: yaml -*-
+
 manifest:
   version: 1.0
 
+on:
+  - pr_created
+  - commit
+
 automations:
-  estimated_time_to_review:
+  {% for item in pipelines %}
+  # Change pr.target to branch.name if you want to trigger on the source branch rather then the target branch.
+  dispatch_github_action_branch_{{ item.name }}:
     if:
-      - true
+      - {{ pr.target | includes(term=item.branch_prefix) }}
     run:
+      - action: run-github-workflow@v1
+        args:
+          workflow: .github/workflows/{{ item.workflow }}
+          check_name: {{ item.name }}
       - action: add-label@v1
         args:
-          label: "{{ calc.etr }} min review"
-          color: {{ colors.red if (calc.etr >= 20) else ( colors.yellow if (calc.etr >= 5) else colors.green ) }}
+          label: {{ item.label }}
+  {% endfor %}
 
-  check_sonarcloud_quality_gate:
-    if:
-      - true
-    run:
-      - action: add-comment@v1
-        args:
-          comment: "SonarCloud quality gate has not passed. Please address the issues and rerun the check."
-      - action: block-pr@v1
-        args:
-          reason: "PR is blocked until SonarCloud issues are resolved."
 
-  label_missing_clickup_info:
-    if:
-      - {{ not (has.clickup_ticket_in_title or has.clickup_ticket_in_desc) }}
-    run:
-      - action: add-label@v1
-        args:
-          label: "missing-clickup"
-          color: {{ colors.red }}
-      - action: add-comment@v1
-        args:
-          comment: |
-            This PR is missing a ClickUp ticket reference in the title or description.
-            Please add a ClickUp ticket reference to the title or description of this PR.
-
-  check_pr_labels_and_descriptions:
-    if:
-      - {{ pr.missing_labels or not pr.has_description }}
-    run:
-      - action: add-comment@v1
-        args:
-          comment: |
-            Please ensure that the PR has the correct labels and a brief description of the approach.
-
-  explain_code_experts:
-    if:
-      - true
-    run:
-      - action: explain-code-experts@v1 
-        args:
-          gt: 10 
-
-calc:
-  etr: {{ branch | estimatedReviewTime }}
-
-has:
-  clickup_ticket_in_title: {{ pr.title | includes(regex=r/CL-\d+/) }}
-  clickup_ticket_in_desc: {{ pr.description | includes(regex=r/clickup.com\/t\/CL-\d+/) }}
-
-colors:
-  red: 'b60205'
-  yellow: 'fbca04'
-  green: '0e8a16'
+pipelines:
+  - name: mobile_ci
+    label: Mobile CI
+    branch_prefix: 'mobile-'
+    workflow: mobile.yml
+  - name: backend_ci
+    label: Backend CI
+    branch_prefix: 'backend-'
+    workflow: 'backend.yml'
