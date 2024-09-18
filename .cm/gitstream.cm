@@ -9,7 +9,7 @@ automations:
       - action: add-label@v1
         args:
           label: "{{ calc.etr }} min review"
-          color: {{ colors.red if (calc.etr >= 20) else ( colors.yellow if (calc.etr >= 5) else colors.green ) }}
+          color: {{ colors.red if (calc.etr >= 20) else (colors.yellow if (calc.etr >= 5) else colors.green) }}
 
   check_sonarcloud_quality_gate:
     if:
@@ -21,10 +21,9 @@ automations:
         args:
           comment: |
             SonarCloud quality gate has not passed. Please address the issues and rerun the check.
-      - action:  request-changes@v1
+      - action: request-changes@v1
         args:
-          check: sonarcloud-quality-gate
-          reason: |
+          comment: |
             PR is blocked until SonarCloud issues are resolved.
 
   label_missing_clickup_info:
