@@ -22,4 +22,5 @@ function properly_formatted_function() {
 
   return camel_case_variable; // Use the variable to avoid unused variable error
 }
+
 properly_formatted_function(); // Call the main function
