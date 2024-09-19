@@ -2,11 +2,11 @@
  * This function is properly formatted according to ESLint rules.
  * @returns {string} A formatted string.
  */
-function properlyFormattedFunction() {
-  const camelCaseVariable = "This should be in camelCase"; // Correct variable naming
+function properly_formatted_function() {
+  // Renamed to snake_case
+  const camel_case_variable = "This should be in snake_case"; // Renamed to snake_case
 
   if (Math.random() > 0.5) {
-    // Replace constant condition with dynamic condition
     console.log("This block is properly indented");
   }
 
@@ -18,8 +18,8 @@ function properlyFormattedFunction() {
     return "This function now has a JSDoc comment";
   }
 
-  nestedFunction(); // Call the function to avoid the unused variable error
+  nested_function(); // Call the nested function to avoid unused function error
 
-  return camelCaseVariable;
+  return camel_case_variable; // Use the variable to avoid unused variable error
 }
-properlyFormattedFunction();
+properly_formatted_function(); // Call the main function

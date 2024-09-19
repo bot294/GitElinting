@@ -1,5 +1,18 @@
 {
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
+  },
+  "eslint.format.enable": true,
+  "eslint.debug": false,
+  "eslint.enable": false,
+  "eslint.alwaysShowStatus": false,
+  "eslint.codeActionsOnSave.mode": "all",
+  "eslint.notebooks.rules.customizations": [],
+  "eslint.codeAction.showDocumentation": {
+    "enable": false
+  },
+  "eslint.codeAction.disableRuleComment": {
+    "location": "sameLine",
+    "commentStyle": "block"
   }
 }
