@@ -10,8 +10,8 @@ export default {
     sourceType: "module",
     parser: tsParser,
     globals: {
-      ...globals.browser, // Enable browser globals like `console`
-      ...globals.node, // Enable Node.js globals like `process`
+      ...globals.browser,
+      ...globals.node,
     },
   },
   plugins: {
@@ -36,17 +36,31 @@ export default {
         format: ["PascalCase"],
       },
     ],
-    "space-before-blocks": ["error", "always"], // Ensure space before blocks
-    "lines-between-class-members": ["error", "always"], // Enforce spacing between class methods
-    "no-unused-vars": "error", // Disallow unused variables
-    "multiline-comment-style": ["error", "starred-block"], // Enforce JSDoc style comments
-    semi: ["error", "always"], // Ensure semicolons are used
-    quotes: ["error", "double"], // Double quote strings
-    "react/prop-types": "off", // Turn off prop-types for React if you're using TypeScript
+    "space-before-blocks": ["error", "always"],
+    "lines-between-class-members": ["error", "always"],
+    "no-unused-vars": "error",
+    "multiline-comment-style": ["error", "starred-block"],
+    semi: ["error", "always"],
+    quotes: ["error", "double"],
+    "react/prop-types": "off",
+
+    // Custom rules for MONITAIR project coding standards
+    "no-inline-comments": "off",  // Ensure comments follow JS Doc style
+    "capitalized-comments": ["error", "always", { "ignoreConsecutiveComments": true }],  // Capitalize comments
+    "array-bracket-spacing": ["error", "never"],  // Ensure no spacing in array brackets
+    "object-curly-spacing": ["error", "always"],  // Ensure spacing inside object brackets
+    "max-len": ["error", { "code": 100 }],  // Enforce max line length
+    "padding-line-between-statements": [
+      "error",
+      { blankLine: "always", prev: "*", next: "return" },
+      { blankLine: "always", prev: "*", next: "if" },
+      { blankLine: "always", prev: "*", next: "for" },
+      { blankLine: "always", prev: "block-like", next: "*" }
+    ]
   },
   settings: {
     react: {
-      version: "detect", // Automatically detect React version
+      version: "detect",
     },
   },
 };
