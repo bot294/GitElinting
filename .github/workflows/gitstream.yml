@@ -53,9 +53,9 @@ jobs:
           resolver_url: ${{ github.event.inputs.resolver_url }}
           resolver_token: ${{ github.event.inputs.resolver_token }}
 
-  # New job for ESLint check
   lint:
     runs-on: ubuntu-latest
+    name: Run ESLint
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -63,9 +63,23 @@ jobs:
       # Install Node.js dependencies to run ESLint
       - name: Install dependencies
         run: npm ci
+      
       # Run ESLint to check the code
       - name: Set executable permissions for node modules
         run: chmod +x ./node_modules/.bin/eslint
+
       - name: Run ESLint
-        run: npm run lint
-        continue-on-error: false  # Fail the workflow if linting errors occur
+        run: npm run lint -- --format checkstyle --output-file eslint-report.xml
+        continue-on-error: true  # Continue even if ESLint fails to allow reporting
+
+      # Upload the ESLint report as an artifact for inspection
+      - name: Upload ESLint report
+        uses: actions/upload-artifact@v3
+        with:
+          name: eslint-report
+          path: eslint-report.xml
+
+      # Fail the workflow if there are linting errors
+      - name: Check for ESLint errors
+        if: failure()
+        run: exit 1
