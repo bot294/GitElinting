@@ -64,7 +64,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
       
-      # Run ESLint to check the code
+      # Install eslint-formatter-checkstyle for the checkstyle format
+      - name: Install eslint-formatter-checkstyle
+        run: npm install -D eslint-formatter-checkstyle
+      
+      # Run ESLint to check the code and generate a report in checkstyle format
       - name: Set executable permissions for node modules
         run: chmod +x ./node_modules/.bin/eslint
 
