@@ -43,20 +43,6 @@ export default {
     semi: ["error", "always"],
     quotes: ["error", "double"],
     "react/prop-types": "off",
-
-    // Custom rules for MONITAIR project coding standards
-    "no-inline-comments": "off",  // Ensure comments follow JS Doc style
-    "capitalized-comments": ["error", "always", { "ignoreConsecutiveComments": true }],  // Capitalize comments
-    "array-bracket-spacing": ["error", "never"],  // Ensure no spacing in array brackets
-    "object-curly-spacing": ["error", "always"],  // Ensure spacing inside object brackets
-    "max-len": ["error", { "code": 100 }],  // Enforce max line length
-    "padding-line-between-statements": [
-      "error",
-      { blankLine: "always", prev: "*", next: "return" },
-      { blankLine: "always", prev: "*", next: "if" },
-      { blankLine: "always", prev: "*", next: "for" },
-      { blankLine: "always", prev: "block-like", next: "*" }
-    ]
   },
   settings: {
     react: {
