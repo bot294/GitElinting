@@ -4,7 +4,7 @@
  */
 function properly_formatted_function() {
   // Renamed to snake_case
-  const camel_caseVariable = "This should be in snake_case"; // Renamed to snake_case
+  const camel_case_variable = "This should be in snake_case"; // Renamed to snake_case
 
   if (Math.random() > 0.5) {
     console.log("This block is properly indented");
