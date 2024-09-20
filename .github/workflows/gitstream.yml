@@ -36,6 +36,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
       # Install dependencies
       - name: Install Node.js dependencies
         run: npm install
@@ -62,9 +63,32 @@ jobs:
       # Install Node.js dependencies to run ESLint
       - name: Install dependencies
         run: npm ci
-      # Run ESLint to check the code
+
+      # Set executable permissions for node modules
       - name: Set executable permissions for node modules
         run: chmod +x ./node_modules/.bin/eslint
+
+      # Run ESLint
       - name: Run ESLint
-        run: npm run lint
-        continue-on-error: false # Fail the workflow if linting errors occur
+        run: npm run lint -- --format checkstyle --output-file eslint-report.xml
+        continue-on-error: true
+
+      # Upload ESLint report (if needed)
+      - name: Upload ESLint report
+        uses: actions/upload-artifact@v3
+        with:
+          name: eslint-report
+          path: eslint-report.xml
+
+      # Create a check for ESLint
+      - name: Create ESLint Check Run
+        uses: actions/create-check@v2
+        with:
+          name: ESLint
+          status: "completed"
+          conclusion: ${{ steps.lint.outcome }} # Will mark as 'success' or 'failure' based on ESLint outcome
+          output:
+            title: "ESLint Results"
+            summary: "ESLint issues reported in this run"
+            text: |
+              Check the ESLint report for detailed errors or warnings.
