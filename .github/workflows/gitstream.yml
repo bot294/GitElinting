@@ -70,6 +70,7 @@ jobs:
 
       # Run ESLint
       - name: Run ESLint
+        id: lint # Set the id for reference later
         run: npm run lint -- --format checkstyle --output-file eslint-report.xml
         continue-on-error: true
 
@@ -85,9 +86,8 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const { context, github } = require('@actions/github');
-            const conclusion = '${{ steps.lint.outcome }}' === 'success' ? 'success' : 'failure';
-            await github.checks.create({
+            const conclusion = steps.lint.outcome === 'success' ? 'success' : 'failure';
+            await github.rest.checks.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               name: 'ESLint',
