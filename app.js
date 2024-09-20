@@ -6,7 +6,7 @@ function properly_formatted_function() {
   // Renamed to snake_case
   const camel_case_variable = "This should be in snake_case"; // Renamed to snake_case
 
-  if (Math.random() > 0.5) {
+  if (Math > 0.5) {
     console.log("This block is properly indented");
   }
 
@@ -17,7 +17,6 @@ function properly_formatted_function() {
   function nested_function() {
     return "This function now has a JSDoc comment";
   }
-
   nested_function(); // Call the nested function to avoid unused function error
 
   return camel_case_variable; // Use the variable to avoid unused variable error
