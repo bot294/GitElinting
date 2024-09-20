@@ -100,3 +100,7 @@ jobs:
                 text: 'Check the ESLint report for detailed errors or warnings.'
               }
             });
+                  # Explicitly complete the job
+      - name: Mark Workflow Status
+        run: exit 0
+
