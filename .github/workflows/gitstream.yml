@@ -101,6 +101,5 @@ jobs:
               }
             });
                   # Explicitly complete the job
-      - name: Mark Workflow Status
-        run: exit 0
+
 
