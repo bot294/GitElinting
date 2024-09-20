@@ -86,7 +86,7 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const conclusion = steps.lint.outcome === 'success' ? 'success' : 'failure';
+            const conclusion = '${{ steps.lint.conclusion }}' === 'success' ? 'success' : 'failure';
             await github.rest.checks.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
