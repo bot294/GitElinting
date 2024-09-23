@@ -37,7 +37,19 @@ automations:
       - action: explain-code-experts@v1 
         args:
           gt: 10 
-
+  assign_code_experts:
+    # Triggered when someone applies a suggest-reviewer label to a PR.
+    if: 
+      - {{ pr.labels | match(term='suggest-reviewer') | some }}
+    # More info about code experts
+    # https://docs.gitstream.cm/filter-functions/#codeexperts
+    run:
+      - action: add-reviewers@v1
+        args:
+          reviewers: {{ repo | codeExperts(gt=10) }}
+      - action: explain-code-experts@v1 
+        args:
+          gt: 10 
 
 # +----------------------------------------------------------------------------+
 # | Custom Expressions                                                         |
@@ -50,7 +62,7 @@ calc:
 has:
   jira_ticket_in_title: {{ pr.title | includes(regex=r/\b[A-Za-z]+-\d+\b/) }}
   jira_ticket_in_desc: {{ pr.description | includes(regex=r/atlassian.net\/browse\/\w{1,}-\d{3,4}/) }}
-
+  
 colors:
   red: 'b60205'
   yellow: 'fbca04'
