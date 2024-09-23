@@ -19,9 +19,3 @@
   "editor.defaultFormatter": "dbaeumer.vscode-eslint", // Set ESLint as the default formatter
   "files.autoSave": "onFocusChange" // Optionally auto-save when you switch focus
 }
-// {
-//   "editor.codeActionsOnSave": {
-//     "source.fixAll.eslint": true
-//   },
-//   "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"]
-// }
