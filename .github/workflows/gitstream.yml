@@ -1,5 +1,6 @@
-name: gitStream PR Automation
-run-name: "/:\\ gitStream: PR #${{ github.event.number }} from ${{ github.event.pull_request.head.repo.full_name }}"
+name: gitStream workflow automation
+run-name: |
+  /:\ gitStream: PR #${{ github.event.number }} from ${{ github.event.pull_request.head.repo.full_name }}
 
 on:
   pull_request:
@@ -12,9 +13,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      # Install dependencies
       - name: Install Node.js dependencies
         run: npm install
 
+      # Evaluate GitStream Rules
       - name: Evaluate GitStream Rules
         uses: linear-b/gitstream-github-action@v2
         id: rules-engine
@@ -33,25 +36,32 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install dependencies for ESLint
+      # Install Node.js dependencies to run ESLint
+      - name: Install dependencies
         run: npm ci
 
+      # Run ESLint
       - name: Run ESLint
         id: lint
         run: npm run lint -- --format checkstyle --output-file eslint-report.xml
         continue-on-error: true
 
+      # Upload ESLint report
       - name: Upload ESLint report
         uses: actions/upload-artifact@v3
         with:
           name: eslint-report
           path: eslint-report.xml
 
+      # Create ESLint Check Run
       - name: Create ESLint Check Run
         uses: actions/github-script@v6
         with:
           script: |
-            const headSha = context.payload.pull_request.head.sha;
+            const headSha = context.payload.pull_request.head.sha; // Fetch the correct SHA from the PR context
+            if (!headSha) {
+              throw new Error('No head SHA available for the pull request.');
+            }
             const conclusion = '${{ steps.lint.outcome }}' === 'success' ? 'success' : 'failure';
             await github.rest.checks.create({
               owner: context.repo.owner,
@@ -62,7 +72,7 @@ jobs:
               conclusion: conclusion,
               output: {
                 title: 'ESLint Check',
-                summary: 'ESLint issues reported in this run',
+                summary: 'ESLint issues reported in this run.',
                 text: 'Check the ESLint report for detailed errors or warnings.'
               }
             });
@@ -73,10 +83,35 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
+      - name: Install SonarScanner
+        run: npm install -g sonar-scanner
+
       - name: Run SonarCloud Scan
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          sonar-scanner -Dsonar.projectKey=your_project_key \
+          sonar-scanner \
+            -Dsonar.projectKey=your_project_key \
             -Dsonar.organization=your_org \
-            -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_TOKEN
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.login=$SONAR_TOKEN
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Run Unit Tests
+      - name: Run Unit Tests
+        run: npm test -- --ci --reporter=jest-junit --outputFile=unit-test-results.xml
+
+      # Upload Unit Test Results
+      - name: Upload Unit Test Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: unit-test-results
+          path: unit-test-results.xml
