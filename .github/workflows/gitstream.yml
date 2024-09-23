@@ -17,7 +17,7 @@ jobs:
 
       # Evaluate GitStream Rules
       - name: Evaluate GitStream Rules
-        uses: linear-b/gitstream-github-action@v3
+        uses: linear-b/gitstream-github-action@v2
         id: rules-engine
         with:
           full_repository: ${{ github.repository }}
