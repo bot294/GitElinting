@@ -17,20 +17,20 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20.x'  # Ensures the latest compatible Node.js version
+          node-version: '20.x'
 
       # Step 3: Set up Python environment
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.x'  # Ensures Python 3.x is used
+          python-version: '3.x'
 
       # Step 4: Run GitStream Action (fixed)
       - name: Run GitStream Action
         uses: linear-b/gitstream-github-action@v2
         with:
           full_repository: true  # Required input
-          debug_mode: true  # Use debug mode to get detailed logging for troubleshooting
+          debug_mode: true       # Debug mode to help track issues
 
       # Step 5: Run ESLint (if applicable)
       - name: Run ESLint
@@ -44,23 +44,3 @@ jobs:
           npm install
           npm test -- --ci --reporter=jest-junit --outputFile=unit-test-results.xml
         continue-on-error: true  # Allows the job to proceed even if tests fail, for debugging purposes
-
-  sonarcloud:
-    runs-on: ubuntu-latest
-    steps:
-      # Step 1: Checkout the repository
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      # Step 2: Install SonarCloud Scanner
-      - name: Install SonarCloud Scanner
-        run: npm install -g sonarqube-scanner
-
-      # Step 3: Run SonarCloud Code Analysis
-      - name: SonarCloud Scan
-        run: sonar-scanner \
-          -Dsonar.organization="your_organization" \
-          -Dsonar.projectKey="your_project_key" \
-          -Dsonar.sources="src" \
-          -Dsonar.host.url="https://sonarcloud.io" \
-          -Dsonar.login="${{ secrets.SONAR_TOKEN }}"
