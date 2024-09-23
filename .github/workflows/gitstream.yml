@@ -58,13 +58,15 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            // Ensure github and context are not redeclared
-            const github = require('@actions/github');
-            
-            // Using github.context directly
-            const { context } = github;
+            // Check if the github object has already been declared
+            if (typeof github === 'undefined') {
+              const github = require('@actions/github');
+            }
 
-            if (!context.payload || !context.payload.pull_request) {
+            const context = github.context;
+
+            // Ensure context and payload are defined
+            if (!context || !context.payload || !context.payload.pull_request) {
               console.log('No pull request context available.');
               return;
             }
