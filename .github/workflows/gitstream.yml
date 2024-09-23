@@ -41,7 +41,7 @@ jobs:
           node-version: '20.12.2'
 
       - name: Install GitStream
-        run: npm install gitstream --save-dev
+        run: npm install linear-b/gitstream#v2 --save-dev
 
       - name: Run GitStream
         run: npx gitstream
