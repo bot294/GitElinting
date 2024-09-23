@@ -58,23 +58,27 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const github = require('@actions/github');
-            const { payload } = github.context;
+            // Check if github is already declared to avoid redeclaration errors
+            if (typeof github === 'undefined') {
+              const github = require('@actions/github');
+            }
+
+            const { payload, sha, repository } = github.context;
 
             if (!payload.pull_request) {
               console.log('No pull request context available.');
               return;
             }
 
-            const sha = payload.pull_request.head.sha || github.context.sha;
+            const head_sha = payload.pull_request.head.sha || sha;
             const conclusion = 'success'; // Change to 'failure' if necessary
 
             try {
               await github.rest.checks.create({
-                owner: payload.repository.owner.login,
-                repo: payload.repository.name,
+                owner: repository.owner.login,
+                repo: repository.name,
                 name: 'Custom PR Checks',
-                head_sha: sha,
+                head_sha: head_sha,
                 status: 'completed',
                 conclusion: conclusion,
                 output: {
