@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
 
       # Install dependencies for gitStream rules
       - name: Install Node.js dependencies
@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
 
       # Install Node.js dependencies to run ESLint
       - name: Install dependencies
@@ -48,7 +48,7 @@ jobs:
 
       # Upload ESLint report
       - name: Upload ESLint report
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: eslint-report
           path: eslint-report.xml
@@ -81,7 +81,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v3
 
       # Install dependencies for testing
       - name: Install Node.js dependencies
@@ -94,7 +94,7 @@ jobs:
 
       # Upload test results
       - name: Upload test results
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v3
         with:
           name: unit-test-results
           path: unit-test-results.xml
