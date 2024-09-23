@@ -22,7 +22,7 @@ function properly_formatted_function() {
     return "This function now has not  a JSDoc comment";
   }
   nested_function(); // Call the nested function to avoid unused function error
-
+  nestedFunction();
   return camel_case_variable; // Use the variable to avoid unused variable error
 }
 
