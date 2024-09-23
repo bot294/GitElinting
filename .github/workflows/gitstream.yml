@@ -1,78 +1,62 @@
-name: gitStream workflow automation
-run-name: |
-  /:\ gitStream: PR #${{ github.event.number }} from ${{ github.event.pull_request.head.repo.full_name }}
+name: CI Workflow
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    branches:
+      - main
 
 jobs:
-  gitStream:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      # Install dependencies
-      - name: Install Node.js dependencies
-        run: npm install
-
-      # Evaluate GitStream Rules
-      - name: Evaluate GitStream Rules
-        uses: linear-b/gitstream-github-action@v2
-        id: rules-engine
-        with:
-          full_repository: ${{ github.repository }}
-          head_ref: ${{ github.head_ref }}
-          base_ref: ${{ github.base_ref }}
-          client_payload: ${{ github.event.client_payload }}
-          installation_id: ${{ github.event.installation_id }}
-          resolver_url: ${{ github.event.resolver_url }}
-          resolver_token: ${{ github.event.resolver_token }}
-
   lint:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout Code
+        uses: actions/checkout@v2
 
-      # Install Node.js dependencies to run ESLint
-      - name: Install dependencies
-        run: npm ci
-
-      # Run ESLint
-      - name: Run ESLint
-        id: lint
-        run: npm run lint -- --format checkstyle --output-file eslint-report.xml
-        continue-on-error: true
-
-      # Upload ESLint report
-      - name: Upload ESLint report
-        uses: actions/upload-artifact@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          name: eslint-report
-          path: eslint-report.xml
+          node-version: '20.12.2'
 
-      # Create ESLint Check Run
-      - name: Create ESLint Check Run
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run GitStream Rules
+        uses: linear-b/gitstream-github-action@<commit-hash>  # Change to a specific commit or version
+        id: rules-engine
+
+      - name: Run Actions GitHub Script
         uses: actions/github-script@v6
         with:
           script: |
-            const headSha = context.payload.pull_request.head.sha; // Fetch the correct SHA from the PR context
+            const { context } = require('@actions/github');
+            const headSha = context.payload.pull_request.head.sha; // Ensure this is defined
             if (!headSha) {
               throw new Error('No head SHA available for the pull request.');
             }
-            const conclusion = '${{ steps.lint.outcome }}' === 'success' ? 'success' : 'failure';
-            await github.rest.checks.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
+            // Your script logic here
+            console.log(`Head SHA: ${headSha}`);
+            
+      - name: Complete Status Check
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const { context } = require('@actions/github');
+            const headSha = context.payload.pull_request.head.sha; // Ensure this is defined
+            const conclusion = 'success'; // Or 'failure' based on your logic
+            await github.checks.create({
+              ...context.repo,
               name: 'ESLint',
               head_sha: headSha,
               status: 'completed',
-              conclusion: conclusion,
+              conclusion,
               output: {
                 title: 'ESLint Check',
                 summary: 'ESLint issues reported in this run',
                 text: 'Check the ESLint report for detailed errors or warnings.'
               }
             });
+
