@@ -6,9 +6,9 @@ function add(a,b)
 {
     console.log(a+b);
 }
-function sub(a,b)
+function sub_fun(a,b)
 {
     console.log(a-b);
 }
 add(2,3);
-sub(5,4)
+sub_fun(5,4);
