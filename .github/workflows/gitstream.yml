@@ -23,9 +23,9 @@ jobs:
           python-version: '3.x'
 
       - name: Run GitStream
-        uses: linear-b/gitstream-github-action@v1
+        uses: linear-b/gitstream-github-action@v2
         with:
-          cm: './gitstream.cm'  # Ensuring correct path to the gitstream.cm file
+          config_file: './gitstream.cm'
 
   lint:
     runs-on: ubuntu-latest
@@ -33,14 +33,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Run ESLint
-        run: npm run lint
+      - name: Install ESLint and Fix Permissions
+        run: |
+          npm install
+          chmod +x node_modules/.bin/eslint
+          npx eslint . --fix
 
   test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Install Jest
+        run: npm install jest --save-dev
 
       - name: Run Unit Tests
         run: npm test -- --ci --reporter=jest-junit --outputFile=unit-test-results.xml
