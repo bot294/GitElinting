@@ -4,8 +4,7 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint": "eslint . --fix"
   },
   "keywords": [],
   "author": "",
@@ -15,7 +14,7 @@
     "@eslint/js": "^9.10.0",
     "@typescript-eslint/eslint-plugin": "^8.6.0",
     "@typescript-eslint/parser": "^8.6.0",
-    "eslint": "^9.10.0",
+    "eslint": "^9.11.0",
     "eslint-formatter-checkstyle": "^8.40.0",
     "eslint-plugin-react": "^7.36.1",
     "eslint-plugin-unicorn": "^55.0.0",
