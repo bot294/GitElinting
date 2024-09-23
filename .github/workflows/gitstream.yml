@@ -58,7 +58,7 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const { github, context } = require('@actions/github'); // Ensure no duplicate declarations
+            const { github, context } = require('@actions/github');
 
             if (!context.payload.pull_request) {
               console.log('No pull request context available.');
