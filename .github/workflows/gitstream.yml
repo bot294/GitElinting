@@ -35,7 +35,6 @@ jobs:
   gitStream:
     timeout-minutes: 5
     runs-on: ubuntu-latest
-    name: gitStream workflow automation
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -84,8 +83,11 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
+            const headSha = '${{ github.event.pull_request.head.sha }}'; // Ensure you retrieve the correct SHA from the PR
+            if (!headSha) {
+              throw new Error('No head SHA available for the pull request.');
+            }
             const conclusion = '${{ steps.lint.outcome }}' === 'success' ? 'success' : 'failure';
-            const headSha = '${{ github.event.pull_request.head.sha }}'; // Use the correct SHA from the PR
             await github.rest.checks.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
