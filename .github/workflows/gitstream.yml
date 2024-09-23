@@ -9,7 +9,7 @@ on:
         description: The Client payload
         required: true
       full_repository:
-        description: the repository name including the owner in `owner/repo_name` format
+        description: the repository name include the owner in `owner/repo_name` format
         required: true
       head_ref:
         description: the head sha
@@ -28,10 +28,14 @@ on:
         required: false
         default: ""
 
+  pull_request:
+    types: [opened, synchronize, reopened]
+
 jobs:
   gitStream:
     timeout-minutes: 5
     runs-on: ubuntu-latest
+    name: gitStream workflow automation
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -52,7 +56,6 @@ jobs:
           resolver_url: ${{ github.event.inputs.resolver_url }}
           resolver_token: ${{ github.event.inputs.resolver_token }}
 
-  # New job for ESLint check
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -63,30 +66,26 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Set executable permissions for node modules
-      - name: Set executable permissions for node modules
-        run: chmod +x ./node_modules/.bin/eslint
-
       # Run ESLint
       - name: Run ESLint
-        id: lint # Set the id for reference later
+        id: lint
         run: npm run lint -- --format checkstyle --output-file eslint-report.xml
         continue-on-error: true
 
-      # Upload ESLint report (if needed)
+      # Upload ESLint report
       - name: Upload ESLint report
         uses: actions/upload-artifact@v3
         with:
           name: eslint-report
           path: eslint-report.xml
 
-      # Use GitHub script to create detailed ESLint check
+      # Create ESLint Check Run
       - name: Create ESLint Check Run
         uses: actions/github-script@v6
         with:
           script: |
             const conclusion = '${{ steps.lint.outcome }}' === 'success' ? 'success' : 'failure';
-            const headSha = '${{ github.event.inputs.head_ref }}'; // Use head_ref from inputs
+            const headSha = '${{ github.event.pull_request.head.sha }}'; // Use the correct SHA from the PR
             await github.rest.checks.create({
               owner: context.repo.owner,
               repo: context.repo.repo,

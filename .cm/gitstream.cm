@@ -1,9 +1,16 @@
 # -*- mode: yaml -*-
+# +----------------------------------------------------------------------------+
+# | /:\ gitStream: Workflow automation for the code review process.            |
+# +----------------------------------------------------------------------------+
+# | This file contains one or more /:\ gitStream automations:                  |
+# | https://docs.gitstream.cm                                                  |
+# +----------------------------------------------------------------------------+
+
 manifest:
   version: 1.0
 
 automations:
-  # Automation to add labels based on estimated review time
+  # Apply color-coded labels to PRs based on the estimated time to review.
   estimated_time_to_review:
     if:
       - true
@@ -11,9 +18,9 @@ automations:
       - action: add-label@v1
         args:
           label: "{{ calc.etr }} min review"
-          color: {{ colors.red if (calc.etr >= 20) else ( colors.yellow if (calc.etr >= 5) else colors.green ) }}
+          color: {{ colors.red if (calc.etr >= 20) else (colors.yellow if (calc.etr >= 5) else colors.green) }}
 
-  # Automation to flag PRs missing a Jira ticket
+  # Flag PRs that are missing a Jira ticket reference in the title or description.
   label_missing_jira_info:
     if:
       - {{ not (has.jira_ticket_in_title or has.jira_ticket_in_desc) }}
@@ -23,7 +30,7 @@ automations:
           label: "missing-jira"
           color: {{ colors.red }}
 
-  # Automation to flag unresolved comment threads
+  # Flag PRs that have unresolved comment threads.
   label_unresolved_threads:
     if:
       - {{ pr.status == 'open' }}
@@ -34,17 +41,17 @@ automations:
           label: 🚨 {{ pr.unresolved_threads }} Unresolved Thread(s)
           color: {{ colors.yellow }}
 
-  # Automation to flag deleted files
+  # Flag PRs that delete files to highlight potential refactors that need extra scrutiny.
   flag_deleted_files:
     if:
       - {{ has.deleted_files }}
-    run: 
+    run:
       - action: add-label@v1
         args:
           label: 🗑️ Deleted files
           color: {{ colors.orange }}
 
-# Custom expressions
+# Custom Expressions
 calc:
   etr: {{ branch | estimatedReviewTime }}
 
