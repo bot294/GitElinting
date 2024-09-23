@@ -9,7 +9,7 @@ on:
         description: The Client payload
         required: true
       full_repository:
-        description: the repository name include the owner in `owner/repo_name` format
+        description: the repository name including the owner in `owner/repo_name` format
         required: true
       head_ref:
         description: the head sha
@@ -32,7 +32,6 @@ jobs:
   gitStream:
     timeout-minutes: 5
     runs-on: ubuntu-latest
-    name: gitStream workflow automation
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -86,8 +85,8 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const headSha = ${{ github.event.inputs.head_ref }}; // Use head_ref from inputs
             const conclusion = '${{ steps.lint.outcome }}' === 'success' ? 'success' : 'failure';
+            const headSha = '${{ github.event.inputs.head_ref }}'; // Use head_ref from inputs
             await github.rest.checks.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
