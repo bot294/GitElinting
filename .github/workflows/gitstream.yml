@@ -58,10 +58,9 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            // Ensure the github object is available
-            const { context } = require('@actions/github');
+            const { github, context } = require('@actions/github');
 
-            // Check if it's a pull request
+            // Ensure we are in a pull request context
             if (!context.payload || !context.payload.pull_request) {
               console.log('No pull request context available.');
               return;
