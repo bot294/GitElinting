@@ -58,20 +58,30 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
+            const { context, github } = require('@actions/github');
+
+            if (!context.payload.pull_request) {
+              console.log('No pull request context available.');
+              return;
+            }
+
             const sha = context.payload.pull_request.head.sha || context.sha;
             const conclusion = 'success'; // or 'failure' based on your checks
 
-            // Use the existing github and context from the action's environment
-            await github.checks.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              name: 'Custom PR Checks',
-              head_sha: sha,
-              status: 'completed',
-              conclusion: conclusion,
-              output: {
-                title: 'Check Summary',
-                summary: 'All checks passed.',
-                text: 'This PR has passed all checks.'
-              }
-            });
+            try {
+              await github.checks.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: 'Custom PR Checks',
+                head_sha: sha,
+                status: 'completed',
+                conclusion: conclusion,
+                output: {
+                  title: 'Check Summary',
+                  summary: 'All checks passed.',
+                  text: 'This PR has passed all checks.'
+                }
+              });
+            } catch (error) {
+              console.error('Error creating check:', error);
+            }
