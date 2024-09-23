@@ -91,7 +91,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               name: 'ESLint',
-              head_sha: context.sha,
+              head_sha: github.event.pull_request.head.sha, # Updated to PR head SHA
               status: 'completed',
               conclusion: conclusion,
               output: {
