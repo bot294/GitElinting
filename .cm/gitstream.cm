@@ -1,3 +1,11 @@
+# -*- mode: yaml -*-
+# +----------------------------------------------------------------------------+
+# | /:\ gitStream: Workflow automation for the code review process.            |
+# +----------------------------------------------------------------------------+
+# | This file contains one or more /:\ gitStream automations:                  |
+# | https://docs.gitstream.cm                                                  |
+# +----------------------------------------------------------------------------+
+
 manifest:
   version: 1.0
 
@@ -5,43 +13,68 @@ automations:
   pr_checks_and_lint:
     if:
       - event == "pull_request"
-      - branch == "main"  # Adjust branch to your main working branch
+      - branch == "main"
     run:
-      # Check proper labels are present
-      - name: Check Labels
+      # Check for labels, description, and other PR standards
+      - name: Check Labels and Description
         command: |
-          if ! jq -e '.pull_request.labels[] | select(.name == "your-label")' <<< "$GITHUB_CONTEXT"; then
-            echo "Missing label, please add appropriate labels.";
-            exit 1;
+          if [ -z "$GITHUB_TOKEN" ]; then
+            echo "GITHUB_TOKEN is not set. Exiting."
+            exit 1
           fi
-          echo "All necessary labels are present."
 
-      # Check description of approach
-      - name: Check PR description
-        command: |
+          # Extract PR labels
+          pr_labels=$(jq -r '.pull_request.labels[].name' <<< "$GITHUB_CONTEXT")
+          if [[ ! "$pr_labels" =~ "bug" && ! "$pr_labels" =~ "enhancement" ]]; then
+            echo "Error: PR must have at least one label (e.g., bug/enhancement/etc.)."
+            exit 1
+          fi
+
+          # Check for description in the PR
           description=$(jq -r '.pull_request.body' <<< "$GITHUB_CONTEXT")
           if [[ -z "$description" ]]; then
-            echo "PR description is missing. Please add a brief explanation of your approach.";
-            exit 1;
+            echo "Error: PR must contain a description."
+            exit 1
           fi
-          echo "PR description is provided."
+          echo "Labels and description check passed."
 
-      # Run ESLint
-      - name: Run ESLint
+      # Run ESLint (for code formatting and coding standards)
+      - name: Run ESLint Check
         command: |
           npm install
-          chmod +x node_modules/.bin/eslint || true
           npx eslint . --fix || true
 
-      # Run SonarCloud Analysis
-      - name: Run SonarCloud
+      # Run SonarCloud Quality Gate
+      - name: Run SonarCloud Quality Gate
         command: |
-          sonar-scanner -Dsonar.projectKey=your_project_key -Dsonar.organization=your_org \
-            -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=$SONAR_TOKEN
+          sonar-scanner \
+            -Dsonar.projectKey=your_project_key \
+            -Dsonar.organization=your_org \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.login=$SONAR_TOKEN
 
-      # Check for coding standards, Swagger, queries, etc.
-      - name: Run Custom PR Checks
+      # Custom coding standards check (e.g., directory structure, swagger, comments)
+      - name: Run Coding Standards Check
         command: |
-          # Additional checks like coding standards, directory structure, Swagger, etc.
-          echo "Running custom checks..."
-          # Add logic to verify Swagger docs, coding standards, etc.
+          # Check for specific directories (e.g., utilities, services, etc.)
+          if [ ! -d "src/utils" ]; then
+            echo "Error: 'utils' directory is missing under 'src/'."
+            exit 1
+          fi
+          echo "Coding standards check passed."
+
+calc:
+  etr: "{{ branch | estimatedReviewTime }}"
+
+has:
+  jira_ticket_in_title: "{{ pr.title | includes(regex=r/([A-Za-z]+-\d+)/) }}"
+  jira_ticket_in_desc: "{{ pr.description | includes(regex=r/https:\/\/.*atlassian.net\/browse\/[A-Za-z]+-\d+/) }}"
+  deleted_files: "{{ source.diff.files | map(attr='new_file') | match(term='/dev/null') | some }}"
+
+colors:
+  red: 'b60205'
+  orange: 'd93f0b'
+  yellow: 'fbca04'
+  green: '0e8a16'
+  blue: '1d76db'
+  purple: '5319e7'
