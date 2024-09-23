@@ -1,6 +1,4 @@
 name: gitStream workflow automation
-run-name: |
-  /:\ gitStream: PR #${{ github.event.number }} from ${{ github.event.pull_request.head.repo.full_name }}
 
 on:
   pull_request:
@@ -13,22 +11,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Install dependencies for gitStream rules
+      # Install Node.js dependencies for gitStream
       - name: Install Node.js dependencies
         run: npm install
 
       # Evaluate GitStream Rules
       - name: Evaluate GitStream Rules
-        uses: linear-b/gitstream-github-action@v2  # Ensure the correct version is used
+        uses: linear-b/gitstream-github-action@v2
         id: rules-engine
         with:
           full_repository: ${{ github.repository }}
           head_ref: ${{ github.head_ref }}
           base_ref: ${{ github.base_ref }}
-          client_payload: ${{ github.event.client_payload }}
-          installation_id: ${{ github.event.installation_id }}
-          resolver_url: ${{ github.event.resolver_url }}
-          resolver_token: ${{ github.event.resolver_token }}
+
+      # Handle Results (if necessary)
+      - name: Check results
+        if: ${{ steps.rules-engine.outputs.conclusion == 'failure' }}
+        run: echo "GitStream rule evaluation failed"
 
   lint:
     runs-on: ubuntu-latest
@@ -44,7 +43,6 @@ jobs:
       - name: Run ESLint
         id: lint
         run: npm run lint -- --format checkstyle --output-file eslint-report.xml
-        continue-on-error: true
 
       # Upload ESLint report
       - name: Upload ESLint report
@@ -53,44 +51,19 @@ jobs:
           name: eslint-report
           path: eslint-report.xml
 
-      # Create ESLint Check Run
-      - name: Create ESLint Check Run
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const headSha = context.payload.pull_request.head.sha;
-            if (!headSha) {
-              throw new Error('No head SHA available for the pull request.');
-            }
-            const conclusion = '${{ steps.lint.outcome }}' === 'success' ? 'success' : 'failure';
-            await github.rest.checks.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              name: 'ESLint',
-              head_sha: headSha,
-              status: 'completed',
-              conclusion: conclusion,
-              output: {
-                title: 'ESLint Check',
-                summary: 'ESLint issues reported in this run',
-                text: 'Check the ESLint report for detailed errors or warnings.'
-              }
-            });
-
   test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Install dependencies for testing
+      # Install Node.js dependencies for testing
       - name: Install Node.js dependencies
         run: npm install
 
-      # Run tests (ensure Jest is installed and configured in package.json)
+      # Run tests
       - name: Run Unit Tests
         run: npm test -- --ci --reporter=jest-junit --outputFile=unit-test-results.xml
-        continue-on-error: true
 
       # Upload test results
       - name: Upload test results
@@ -98,27 +71,3 @@ jobs:
         with:
           name: unit-test-results
           path: unit-test-results.xml
-
-      # Create a Check Run for test results
-      - name: Create Test Check Run
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const headSha = context.payload.pull_request.head.sha;
-            if (!headSha) {
-              throw new Error('No head SHA available for the pull request.');
-            }
-            const conclusion = '${{ steps.test.outcome }}' === 'success' ? 'success' : 'failure';
-            await github.rest.checks.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              name: 'Unit Tests',
-              head_sha: headSha,
-              status: 'completed',
-              conclusion: conclusion,
-              output: {
-                title: 'Unit Test Check',
-                summary: 'Unit test results',
-                text: 'Check the test report for details.'
-              }
-            });
