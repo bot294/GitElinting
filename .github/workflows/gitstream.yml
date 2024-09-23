@@ -58,7 +58,8 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const { github, context } = require('@actions/github');
+            const { context } = require('@actions/github');
+            const github = require('@actions/github').getOctokit(process.env.GITHUB_TOKEN);
 
             if (!context.payload.pull_request) {
               console.log('No pull request context available.');
@@ -66,10 +67,10 @@ jobs:
             }
 
             const sha = context.payload.pull_request.head.sha || context.sha;
-            const conclusion = 'success'; // or 'failure' based on your checks
+            const conclusion = 'success'; // Change to 'failure' if necessary
 
             try {
-              await github.checks.create({
+              await github.rest.checks.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 name: 'Custom PR Checks',
