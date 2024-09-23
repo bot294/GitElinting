@@ -25,7 +25,7 @@ jobs:
         run: npm run lint
 
       - name: Run GitStream Rules
-        uses: linear-b/gitstream-github-action@<commit-hash>  # Change to a specific commit or version
+        uses: linear-b/gitstream-github-action@v2  # Change to a specific commit or version
         id: rules-engine
 
       - name: Run Actions GitHub Script
