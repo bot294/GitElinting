@@ -1,67 +1,57 @@
 # -*- mode: yaml -*-
-# GitStream automation for the code review process
-
+# This example configuration for provides basic automations to get started with gitStream.
+# View the gitStream quickstart for more examples: https://docs.gitstream.cm/examples/
 manifest:
   version: 1.0
 
+
 automations:
-  # Run ESLint and custom PR checks when a PR is created or updated on 'main'
-  pr_checks_and_lint:
+  # Add a label that indicates how many minutes it will take to review the PR.
+  estimated_time_to_review:
     if:
-      - event == "pull_request"
-      - branch == "main"
+      - true
     run:
-      - name: Run ESLint Check
-        command: |
-          npm install
-          chmod +x node_modules/.bin/eslint
-          npx eslint . --fix
-      - name: Log ESLint Completion
-        command: echo "ESLint check completed."
+      - action: add-label@v1
+        args:
+          label: "{{ calc.etr }} min review"
+          color: {{ colors.red if (calc.etr >= 20) else ( colors.yellow if (calc.etr >= 5) else colors.green ) }}
+  # Inform PR authors when they fail to reference Jira tickets in the PR title or description.
+  label_missing_jira_info:
+    if:
+      - {{ not (has.jira_ticket_in_title or has.jira_ticket_in_desc) }}
+    run:
+      - action: add-label@v1
+        args:
+          label: "missing-jira"
+          color: {{ colors.red }}
+      - action: add-comment@v1
+        args:
+          comment: |
+            This PR is missing a Jira ticket reference in the title or description.
+            Please add a Jira ticket reference to the title or description of this PR.
+  # Post a comment that lists the best experts for the files that were modified.
+  explain_code_experts:
+    if:
+      - true
+    run:
+      - action: explain-code-experts@v1 
+        args:
+          gt: 10 
 
-      - name: Run Custom PR Checks
-        command: |
-          if [ -z "$GITHUB_TOKEN" ]; then
-            echo "GITHUB_TOKEN is not set. Exiting."
-            exit 1
-          fi
 
-          # Get the head SHA for the PR
-          head_sha=$(jq -r .pull_request.head.sha <<< "$GITHUB_CONTEXT")
+# +----------------------------------------------------------------------------+
+# | Custom Expressions                                                         |
+# | https://docs.gitstream.cm/how-it-works/#custom-expressions                 |
+# +----------------------------------------------------------------------------+
 
-          # Set the conclusion for the check run (success/failure)
-          conclusion="success"  # You can modify this based on your custom logic
-
-          # Run the GitHub API request to create a check run
-          curl -X POST \
-            -H "Authorization: token $GITHUB_TOKEN" \
-            -H "Content-Type: application/json" \
-            -d '{
-              "name": "Custom PR Checks",
-              "head_sha": "'"$head_sha"'",
-              "status": "completed",
-              "conclusion": "'"$conclusion"'",
-              "output": {
-                "title": "Check Summary",
-                "summary": "All checks passed.",
-                "text": "This PR has passed all checks."
-              }
-            }' \
-            https://api.github.com/repos/${GITHUB_REPOSITORY}/check-runs
-
-# Add custom expressions if needed for calculating review time, Jira checks, etc.
 calc:
-  etr: "{{ branch | estimatedReviewTime }}"
+  etr: {{ branch | estimatedReviewTime }}
 
 has:
-  jira_ticket_in_title: "{{ pr.title | includes(regex=r/([A-Za-z]+-\d+)/) }}"
-  jira_ticket_in_desc: "{{ pr.description | includes(regex=r/https:\/\/.*atlassian.net\/browse\/[A-Za-z]+-\d+/) }}"
-  deleted_files: "{{ source.diff.files | map(attr='new_file') | match(term='/dev/null') | some }}"
+  jira_ticket_in_title: {{ pr.title | includes(regex=r/\b[A-Za-z]+-\d+\b/) }}
+  jira_ticket_in_desc: {{ pr.description | includes(regex=r/atlassian.net\/browse\/\w{1,}-\d{3,4}/) }}
 
 colors:
   red: 'b60205'
-  orange: 'd93f0b'
   yellow: 'fbca04'
   green: '0e8a16'
-  blue: '1d76db'
-  purple: '5319e7'
