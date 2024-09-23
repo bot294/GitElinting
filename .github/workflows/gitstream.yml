@@ -58,8 +58,8 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const { context } = require('@actions/github');
-            const github = require('@actions/github').getOctokit(process.env.GITHUB_TOKEN);
+            const { getOctokit, context } = require('@actions/github');
+            const github = getOctokit(process.env.GITHUB_TOKEN);
 
             if (!context.payload.pull_request) {
               console.log('No pull request context available.');
