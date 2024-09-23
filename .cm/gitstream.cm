@@ -1,10 +1,5 @@
 # -*- mode: yaml -*-
-# +----------------------------------------------------------------------------+
-# | /:\ gitStream: Workflow automation for the code review process.            |
-# +----------------------------------------------------------------------------+
-# | This file contains one or more /:\ gitStream automations:                  |
-# | https://docs.gitstream.cm                                                  |
-# +----------------------------------------------------------------------------+
+# GitStream automation for the code review process
 
 manifest:
   version: 1.0
@@ -19,8 +14,11 @@ automations:
       - name: Run ESLint Check
         command: |
           npm install
-          chmod +x node_modules/.bin/eslint || true
-          npx eslint . --fix || true
+          chmod +x node_modules/.bin/eslint
+          npx eslint . --fix
+      - name: Log ESLint Completion
+        command: echo "ESLint check completed."
+
       - name: Run Custom PR Checks
         command: |
           if [ -z "$GITHUB_TOKEN" ]; then
@@ -32,7 +30,7 @@ automations:
           head_sha=$(jq -r .pull_request.head.sha <<< "$GITHUB_CONTEXT")
 
           # Set the conclusion for the check run (success/failure)
-          conclusion="success" # Adjust as needed
+          conclusion="success"  # You can modify this based on your custom logic
 
           # Run the GitHub API request to create a check run
           curl -X POST \
@@ -51,6 +49,7 @@ automations:
             }' \
             https://api.github.com/repos/${GITHUB_REPOSITORY}/check-runs
 
+# Add custom expressions if needed for calculating review time, Jira checks, etc.
 calc:
   etr: "{{ branch | estimatedReviewTime }}"
 
