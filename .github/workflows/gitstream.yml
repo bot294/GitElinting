@@ -4,29 +4,6 @@ on:
   pull_request:
     branches: [main]
   workflow_dispatch:
-    inputs:
-      client_payload:
-        description: 'The Client payload'
-        required: true
-      full_repository:
-        description: 'The repository name including the owner in owner/repo_name format'
-        required: true
-      head_ref:
-        description: 'The head sha'
-        required: true
-      base_ref:
-        description: 'The base ref'
-        required: true
-      installation_id:
-        description: 'The installation id'
-        required: false
-      resolver_url:
-        description: 'The resolver url to pass results to'
-        required: true
-      resolver_token:
-        description: 'Optional resolver token for resolver service'
-        required: false
-        default: ""
 
 jobs:
   gitStream:
@@ -43,16 +20,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Evaluate GitStream Rules
-        uses: linear-b/gitstream-github-action@v2
+        uses: linear-b/gitstream-github-action@v3
         id: rules-engine
+        continue-on-error: true
         with:
-          full_repository: ${{ github.event.inputs.full_repository || github.repository }}
-          head_ref: ${{ github.event.inputs.head_ref || github.head_ref }}
-          base_ref: ${{ github.event.inputs.base_ref || github.base_ref }}
-          client_payload: ${{ github.event.inputs.client_payload || '{}' }}
-          installation_id: ${{ github.event.inputs.installation_id }}
-          resolver_url: ${{ github.event.inputs.resolver_url }}
-          resolver_token: ${{ github.event.inputs.resolver_token }}
+          base_ref: ${{ github.base_ref }}
+          head_ref: ${{ github.head_ref }}
+      - name: Debug gitStream output
+        if: always()
+        run: |
+          echo "GitStream exit code: ${{ steps.rules-engine.exitCode }}"
+          echo "GitStream outputs: ${{ toJson(steps.rules-engine.outputs) }}"
       - name: Report gitStream status
         if: always()
         uses: actions/github-script@v6
