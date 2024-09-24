@@ -1,6 +1,3 @@
-function new_fun() {
-  console.log("Total sum is :  ");
-}
 new_fun();
 function add(a,b)
 {
