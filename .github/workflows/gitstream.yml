@@ -68,7 +68,7 @@ jobs:
         if: always()
         uses: actions/github-script@v6
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
@@ -79,7 +79,7 @@ jobs:
               description: 'gitStream job completed with status: ${{ job.status }}'
             })
 
-    lint:
+  lint:
     runs-on: ubuntu-latest
     name: ESLint Check
     steps:
@@ -115,7 +115,7 @@ jobs:
         if: always()
         uses: actions/github-script@v6
         with:
-          github-token: ${{secrets.GITHUB_TOKEN}}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const eslint_failed = process.env.eslint_failed === 'true';
             console.log(`Reporting ESLint status: ${eslint_failed ? 'failure' : 'success'}`);
