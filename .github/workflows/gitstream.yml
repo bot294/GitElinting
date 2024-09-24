@@ -87,19 +87,36 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Run ESLint
-        run: npx eslint .
+        id: eslint
+        run: |
+          npx eslint . --format json --output-file eslint_report.json
         continue-on-error: true
+      - name: Check ESLint results
+        id: check-eslint
+        run: |
+          ERROR_COUNT=$(jq '.length' eslint_report.json)
+          if [ $ERROR_COUNT -gt 0 ]; then
+            echo "ESLint found $ERROR_COUNT errors or warnings"
+            echo "eslint_failed=true" >> $GITHUB_OUTPUT
+          else
+            echo "ESLint passed with no errors or warnings"
+            echo "eslint_failed=false" >> $GITHUB_OUTPUT
+          fi
       - name: Report ESLint status
         if: always()
         uses: actions/github-script@v6
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
+            const eslint_failed = '${{ steps.check-eslint.outputs.eslint_failed }}' === 'true';
             github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
               sha: context.sha,
-              state: '${{ job.status }}',
+              state: eslint_failed ? 'failure' : 'success',
               context: 'ESLint Check',
-              description: 'ESLint job completed with status: ${{ job.status }}'
-            })
+              description: eslint_failed ? 'ESLint found errors or warnings' : 'ESLint passed'
+            });
+            if (eslint_failed) {
+              core.setFailed('ESLint check failed');
+            }
