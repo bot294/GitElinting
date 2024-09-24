@@ -2,10 +2,14 @@ name: gitStream and ESLint Checks
 
 on:
   pull_request:
-    branches: [main]
+    branches:
+      - main
   workflow_dispatch:
     inputs:
-      client_payload: ...
+      client_payload:
+        description: 'Client payload for the workflow'
+        required: false
+        default: '{}'
 
 jobs:
   gitStream:
