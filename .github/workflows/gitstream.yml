@@ -35,22 +35,19 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          node-version: '20'  # Ensuring Node 20 is explicitly set
-
+        uses: actions/checkout@v3  # Removed invalid input 'node-version'
+      
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'  # Setting Node.js version 20
-      
+          node-version: '20'  # Setting Node.js version explicitly to 20
+
       - name: Install dependencies
         run: npm ci
 
       - name: Evaluate GitStream Rules
         uses: linear-b/gitstream-github-action@v2
         id: rules-engine
-        continue-on-error: true
         with:
           full_repository: ${{ github.event.inputs.full_repository || github.repository }}
           head_ref: ${{ github.event.inputs.head_ref || github.head_ref }}
@@ -87,14 +84,12 @@ jobs:
     name: ESLint Check
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          node-version: '20'  # Ensuring Node 20 is explicitly set
+        uses: actions/checkout@v3  # Removed invalid input 'node-version'
       
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'  # Setting Node.js version 20
+          node-version: '20'  # Setting Node.js version explicitly to 20
       
       - name: Install dependencies
         run: npm ci
