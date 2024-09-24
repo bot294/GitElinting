@@ -106,19 +106,19 @@ jobs:
           ERROR_COUNT=$(jq '[.[] | select(.errorCount > 0 or .warningCount > 0)] | length' eslint_report.json)
           if [ $ERROR_COUNT -gt 0 ]; then
             echo "ESLint found $ERROR_COUNT errors or warnings"
-            echo "eslint_failed=true" >> $GITHUB_OUTPUT
+            echo "eslint_failed=true" >> $GITHUB_ENV
           else
             echo "ESLint passed with no errors or warnings"
-            echo "eslint_failed=false" >> $GITHUB_OUTPUT
+            echo "eslint_failed=false" >> $GITHUB_ENV
           fi
 
       - name: Report ESLint status
         if: always()
-        uses: actions/github-script@v6 
+        uses: actions/github-script@v6
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
-            const eslint_failed = '${{ steps.check-eslint.outputs.eslint_failed }}' === 'true';
+            const eslint_failed = process.env.eslint_failed === 'true';
             github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
