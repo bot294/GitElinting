@@ -94,13 +94,13 @@ jobs:
       - name: Check ESLint results
         id: check-eslint
         run: |
-          ERROR_COUNT=$(jq '.length' eslint_report.json)
-          if [ $ERROR_COUNT -gt 0 ]; then
-            echo "ESLint found $ERROR_COUNT errors or warnings"
-            echo "eslint_failed=true" >> $GITHUB_OUTPUT
-          else
-            echo "ESLint passed with no errors or warnings"
-            echo "eslint_failed=false" >> $GITHUB_OUTPUT
+         ERROR_COUNT=$(jq '. | length' eslint_report.json)
+         if [ $ERROR_COUNT -gt 0 ]; then
+          echo "ESLint found $ERROR_COUNT errors or warnings"
+          echo "eslint_failed=true" >> $GITHUB_OUTPUT
+         else
+          echo "ESLint passed with no errors or warnings"
+          echo "eslint_failed=false" >> $GITHUB_OUTPUT
           fi
       - name: Report ESLint status
         if: always()
