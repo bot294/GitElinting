@@ -35,12 +35,12 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3  # Removed invalid input 'node-version'
-      
+        uses: actions/checkout@v3  # Removed invalid 'node-version'
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'  # Setting Node.js version explicitly to 20
+          node-version: '20'  # Explicitly set Node.js version
 
       - name: Install dependencies
         run: npm ci
@@ -66,7 +66,7 @@ jobs:
 
       - name: Report gitStream status
         if: always()
-        uses: actions/github-script@v6
+        uses: actions/github-script@v6  # Removed invalid 'node-version'
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -84,13 +84,13 @@ jobs:
     name: ESLint Check
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3  # Removed invalid input 'node-version'
+        uses: actions/checkout@v3  # Removed invalid 'node-version'
       
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'  # Setting Node.js version explicitly to 20
-      
+          node-version: '20'  # Set Node.js version to 20
+
       - name: Install dependencies
         run: npm ci
       
@@ -100,7 +100,7 @@ jobs:
       
       - name: Report ESLint status
         if: always()
-        uses: actions/github-script@v6
+        uses: actions/github-script@v6  # Removed invalid 'node-version'
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
