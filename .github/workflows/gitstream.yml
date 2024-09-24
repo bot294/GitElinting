@@ -28,35 +28,42 @@ on:
         required: false
         default: ""
 
+name: gitStream Workflow
+
+on:
+  pull_request:
+    branches:
+      - main
+
 jobs:
   gitStream:
     runs-on: ubuntu-latest
-    name: gitStream workflow automation
-    timeout-minutes: 10
+
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3  # Removed invalid 'node-version'
+        uses: actions/checkout@v3
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'  # Explicitly set Node.js version
+          node-version: '20'
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Evaluate GitStream Rules
-        uses: linear-b/gitstream-github-action@v2
-        id: rules-engine
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
-          full_repository: ${{ github.event.inputs.full_repository || github.repository }}
-          head_ref: ${{ github.event.inputs.head_ref || github.head_ref }}
-          base_ref: ${{ github.event.inputs.base_ref || github.base_ref }}
-          client_payload: |
-            ${{ github.event.inputs.client_payload || '{}' }}
-          installation_id: ${{ github.event.inputs.installation_id }}
-          resolver_url: ${{ github.event.inputs.resolver_url }}
-          resolver_token: ${{ github.event.inputs.resolver_token || secrets.RESOLVER_TOKEN }}
+          python-version: '3.x'
+
+      - name: Run GitStream Action
+        uses: linear-b/gitstream-github-action@v1
+        with:
+          full_repository: ${{ github.repository }}
+          head_ref: ${{ github.head_ref }}
+          base_ref: ${{ github.base_ref }}
+
+      - name: Cleanup GitStream data
+        run: |
+          rm -rf gitstream
+          rm -rf code
 
       - name: Debug gitStream output
         if: always()
