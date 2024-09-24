@@ -4,11 +4,15 @@ function new_fun() {
 new_fun();
 function add(a,b)
 {
-    console.log(a+b);
+    return a+b;
 }
 function sub_fun(a,b)
 {
-    console.log(a-b);
-}
-add(2,3);
-sub_fun(5,4);
+    
+    return a-b;
+}    
+function new_fun() 
+{       
+   console.log(add(2,3));
+    console.log(sub_fun(5,4));
+}        
