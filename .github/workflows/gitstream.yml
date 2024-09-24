@@ -98,7 +98,6 @@ jobs:
         id: eslint
         run: |
           npx eslint . --format json --output-file eslint_report.json
-        continue-on-error: true  # Allow ESLint to run even if there are issues
 
       - name: Check ESLint results
         id: check-eslint
@@ -107,6 +106,7 @@ jobs:
           if [ $ERROR_COUNT -gt 0 ]; then
             echo "ESLint found $ERROR_COUNT errors or warnings"
             echo "eslint_failed=true" >> $GITHUB_ENV
+            exit 1  # This will force the job to fail
           else
             echo "ESLint passed with no errors or warnings"
             echo "eslint_failed=false" >> $GITHUB_ENV
