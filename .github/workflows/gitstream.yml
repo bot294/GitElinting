@@ -79,7 +79,7 @@ jobs:
               description: 'gitStream job completed with status: ${{ job.status }}'
             })
 
-  lint:
+    lint:
     runs-on: ubuntu-latest
     name: ESLint Check
     steps:
@@ -98,17 +98,16 @@ jobs:
         id: eslint
         run: |
           npx eslint . --format json --output-file eslint_report.json
+        continue-on-error: true  # Allow the workflow to proceed to report status
 
       - name: Check ESLint results
         id: check-eslint
         run: |
           ERROR_COUNT=$(jq '[.[] | select(.errorCount > 0 or .warningCount > 0)] | length' eslint_report.json)
-          if [ $ERROR_COUNT -gt 0 ]; then
-            echo "ESLint found $ERROR_COUNT errors or warnings"
+          echo "ESLint error count: $ERROR_COUNT"
+          if [ "$ERROR_COUNT" -gt 0 ]; then
             echo "eslint_failed=true" >> $GITHUB_ENV
-            exit 1  # This will force the job to fail
           else
-            echo "ESLint passed with no errors or warnings"
             echo "eslint_failed=false" >> $GITHUB_ENV
           fi
 
@@ -119,6 +118,7 @@ jobs:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
             const eslint_failed = process.env.eslint_failed === 'true';
+            console.log(`Reporting ESLint status: ${eslint_failed ? 'failure' : 'success'}`);
             github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
