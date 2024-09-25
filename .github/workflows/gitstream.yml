@@ -46,7 +46,7 @@ jobs:
         run: npm ci
 
       - name: Evaluate GitStream Rules
-        uses: linear-b/gitstream-github-action@v2-alpha
+        uses: linear-b/gitstream-github-action@v1.0.9
         id: rules-engine
         continue-on-error: true
         with:
