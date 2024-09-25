@@ -4,7 +4,7 @@ import tsParser from "@typescript-eslint/parser";
 import react from "eslint-plugin-react";
 
 export default {
-  files: ["*.js", "*.jsx", "*.ts", "*.tsx"],
+  files: [".js", ".jsx", ".ts", ".tsx"],
   languageOptions: {
     ecmaVersion: "latest",
     sourceType: "module",
@@ -36,8 +36,6 @@ export default {
         format: ["PascalCase"],
       },
     ],
-    // "require-jsdoc": "error", // Ensure JSDoc comments are required
-    // "valid-jsdoc": "error", 
     "space-before-blocks": ["error", "always"],
     "lines-between-class-members": ["error", "always"],
     "no-unused-vars": "error",
