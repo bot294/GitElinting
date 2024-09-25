@@ -60,7 +60,7 @@ jobs:
           full_repository: ${{ github.repository }}
           head_ref: ${{ github.head_ref }}
           base_ref: ${{ github.base_ref }}
-          client_payload: '${{ github.event.inputs.client_payload || "{}" }}'
+          client_payload: ${{ github.event.inputs.client_payload || '{}' }}  # Fixed format for YAML input
           installation_id: ${{ github.event.inputs.installation_id || '' }}
           resolver_url: ${{ github.event.inputs.resolver_url }}
           resolver_token: ${{ github.event.inputs.resolver_token || secrets.RESOLVER_TOKEN || '' }}
@@ -70,3 +70,52 @@ jobs:
         run: |
           echo "GitStream exit code: ${{ steps.rules-engine.outcome }}"
           echo "GitStream outputs: ${{ toJson(steps.rules-engine.outputs) }}"
+
+      - name: Report gitStream status
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: '${{ job.status }}',
+              context: 'gitStream workflow automation',
+              description: 'gitStream job completed with status: ${{ job.status }}'
+            })
+
+  lint:
+    runs-on: ubuntu-latest
+    name: ESLint Check
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run ESLint
+        run: npx eslint .
+        continue-on-error: true
+      
+      - name: Report ESLint status
+        if: always()
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: '${{ job.status }}',
+              context: 'ESLint Check',
+              description: 'ESLint job completed with status: ${{ job.status }}'
+            })
