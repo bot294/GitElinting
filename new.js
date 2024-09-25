@@ -1,14 +1,14 @@
-function new_fun() {
-  console.log("Total sum is :  ");
-}
-new_fun();
+new_fun1();
 function add(a,b)
 {
-    console.log(a+b);
+    return a+b;
 }
-function sub(a,b)
+function sub_fun(a,b)
 {
-    console.log(a-b);
-}
-add(2,3);
-sub(5,4)
+    return a-b;
+}    
+function new_fun1() 
+{       
+   console.log(add(2,3) + sub_fun(5,4));
+}        
+
