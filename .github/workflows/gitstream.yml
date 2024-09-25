@@ -35,7 +35,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
       
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -46,7 +46,7 @@ jobs:
         run: npm ci
 
       - name: Evaluate GitStream Rules
-        uses: linear-b/gitstream-github-action@v1.0.9
+        uses: linear-b/gitstream-github-action@v2
         id: rules-engine
         continue-on-error: true
         with:
@@ -54,7 +54,7 @@ jobs:
           head_ref: ${{ github.event.inputs.head_ref || github.head_ref }}
           base_ref: ${{ github.event.inputs.base_ref || github.base_ref }}
           client_payload: |
-            ${{ github.event.inputs.client_payload || '{}' }}
+            ${{ toJson(github.event.inputs.client_payload || '{}') }}  # Properly formatted JSON payload
           installation_id: ${{ github.event.inputs.installation_id }}
           resolver_url: ${{ github.event.inputs.resolver_url }}
           resolver_token: ${{ github.event.inputs.resolver_token || secrets.RESOLVER_TOKEN }}
@@ -85,7 +85,7 @@ jobs:
     name: ESLint Check
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
       
       - name: Setup Node.js
         uses: actions/setup-node@v4
