@@ -46,7 +46,7 @@ jobs:
         run: npm ci
 
       - name: Evaluate GitStream Rules
-        uses: linear-b/gitstream-github-action@v2
+        uses: linear-b/gitstream-github-action@v2-alpha
         id: rules-engine
         continue-on-error: true
         with:
@@ -54,7 +54,7 @@ jobs:
           head_ref: ${{ github.event.inputs.head_ref || github.head_ref }}
           base_ref: ${{ github.event.inputs.base_ref || github.base_ref }}
           client_payload: |
-            ${{ github.event.inputs.client_payload || '{}' }} # Fixed format for YAML input
+            ${{ toJson(github.event.inputs.client_payload || '{}') }}  # Properly formatted JSON payload
           installation_id: ${{ github.event.inputs.installation_id }}
           resolver_url: ${{ github.event.inputs.resolver_url }}
           resolver_token: ${{ github.event.inputs.resolver_token || secrets.RESOLVER_TOKEN }}
@@ -113,3 +113,4 @@ jobs:
               context: 'ESLint Check',
               description: 'ESLint job completed with status: ${{ job.status }}'
             })
+
