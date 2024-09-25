@@ -53,7 +53,7 @@ jobs:
           echo "Client payload: ${{ github.event.inputs.client_payload || '{}' }}"
 
       - name: Evaluate GitStream Rules
-        uses: linear-b/gitstream-github-action@v2.319.1
+        uses: linear-b/gitstream-github-action@v3
         id: rules-engine
         continue-on-error: true
         with:
