@@ -12,16 +12,16 @@ on:
         description: 'The repository name including the owner in owner/repo_name format'
         required: true
       head_ref:
-        description: 'The head SHA'
+        description: 'The head sha'
         required: true
       base_ref:
         description: 'The base ref'
         required: true
       installation_id:
-        description: 'The installation ID'
+        description: 'The installation id'
         required: false
       resolver_url:
-        description: 'The resolver URL to pass results to'
+        description: 'The resolver url to pass results to'
         required: true
       resolver_token:
         description: 'Optional resolver token for resolver service'
@@ -31,7 +31,7 @@ on:
 jobs:
   gitStream:
     runs-on: ubuntu-latest
-    name: gitStream Workflow Automation
+    name: gitStream workflow automation
     timeout-minutes: 10
     steps:
       - name: Checkout repository
@@ -46,17 +46,18 @@ jobs:
         run: npm ci
 
       - name: Evaluate GitStream Rules
-        uses: linear-b/gitstream-github-action@v2  # Upgraded to v2
+        uses: linear-b/gitstream-github-action@v2
         id: rules-engine
         continue-on-error: true
         with:
-          full_repository: ${{ inputs.full_repository || github.repository }}
-          head_ref: ${{ inputs.head_ref || github.head_ref }}
-          base_ref: ${{ inputs.base_ref || github.base_ref }}
-          client_payload: ${{ inputs.client_payload }}  # Fixed YAML input formatting
-          installation_id: ${{ inputs.installation_id || '' }}
-          resolver_url: ${{ inputs.resolver_url }}
-          resolver_token: ${{ inputs.resolver_token || secrets.RESOLVER_TOKEN || '' }}
+          full_repository: ${{ github.event.inputs.full_repository || github.repository }}
+          head_ref: ${{ github.event.inputs.head_ref || github.head_ref }}
+          base_ref: ${{ github.event.inputs.base_ref || github.base_ref }}
+          client_payload: |
+            ${{ github.event.inputs.client_payload || '{}' }} # Fixed format for YAML input
+          installation_id: ${{ github.event.inputs.installation_id }}
+          resolver_url: ${{ github.event.inputs.resolver_url }}
+          resolver_token: ${{ github.event.inputs.resolver_token || secrets.RESOLVER_TOKEN }}
 
       - name: Debug gitStream output
         if: always()
@@ -64,20 +65,20 @@ jobs:
           echo "GitStream exit code: ${{ steps.rules-engine.outcome }}"
           echo "GitStream outputs: ${{ toJson(steps.rules-engine.outputs) }}"
 
-      - name: Report GitStream status
+      - name: Report gitStream status
         if: always()
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          github.rest.repos.createCommitStatus({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            sha: context.sha,
-            state: '${{ job.status }}',
-            context: 'gitStream Workflow Automation',
-            description: 'gitStream job completed with status: ${{ job.status }}'
-          })
+          script: |
+            github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: '${{ job.status }}',
+              context: 'gitStream workflow automation',
+              description: 'gitStream job completed with status: ${{ job.status }}'
+            })
 
   lint:
     runs-on: ubuntu-latest
@@ -95,7 +96,7 @@ jobs:
         run: npm ci
       
       - name: Run ESLint
-        run: npx eslint . --format stylish  # Added ESLint output formatting
+        run: npx eslint .
         continue-on-error: true
       
       - name: Report ESLint status
@@ -103,12 +104,12 @@ jobs:
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          github.rest.repos.createCommitStatus({
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            sha: context.sha,
-            state: '${{ job.status }}',
-            context: 'ESLint Check',
-            description: 'ESLint job completed with status: ${{ job.status }}'
-          })
+          script: |
+            github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: context.sha,
+              state: '${{ job.status }}',
+              context: 'ESLint Check',
+              description: 'ESLint job completed with status: ${{ job.status }}'
+            })
